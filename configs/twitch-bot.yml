@@ -1,0 +1,10 @@
+mode: run-twitch-bot
+log-level: INFO
+bot-mode: testing
+api:
+  host: localhost
+  port: 6660
+tokens:
+  twitch: tokens/twitch.yml
+channel-names:
+  - colinbenders

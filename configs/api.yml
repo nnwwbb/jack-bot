@@ -1,0 +1,8 @@
+mode: run-api
+log-level: DEBUG
+api:
+  host: localhost
+  port: 6660
+  reload: true
+tokens:
+  twitch: tokens/twitch.yml
