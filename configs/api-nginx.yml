@@ -1,0 +1,12 @@
+mode: run-api
+log-level: INFO
+api:
+  host: localhost
+  port: 6660
+  reload: true
+tokens:
+  twitch: tokens/twitch.yml
+nginx-settings:
+  docs_url: '/api/docs'
+  redoc_url: '/api/redoc'
+  openapi_url: '/api/openapi.json'

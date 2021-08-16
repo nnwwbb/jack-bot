@@ -51,11 +51,22 @@ def get_messages(seconds_history: int = None, channel_names: Optional[List[str]]
 
 def main():
     # initialize the application
-    app = FastAPI(
-        title='Jack Bot API',
-        description='Something something moon',
-        version='0.1'
-    )
+    if 'nginx-settings' in cfg:
+        app = FastAPI(
+            title='Jack Bot API',
+            description='Something something moon',
+            version='0.1',
+            docs_url=cfg['nginx-settings']['docs_url'],
+            redoc_url=cfg['nginx-settings']['redoc_url'],
+            openapi_url=cfg['nginx-settings']['openapi_url']
+        )
+    else:
+        app = FastAPI(
+            title='Jack Bot API',
+            description='Something something moon',
+            version='0.1'
+        )
+
 
     app.include_router(router)
     return app
