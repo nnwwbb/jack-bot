@@ -2,8 +2,7 @@ mode: run-twitch-bot
 log-level: DEBUG
 bot-mode: testing
 api:
-  host: localhost
-  port: 6660
+  url: 'https://jack.benderfactory.com/api/'
 tokens:
   twitch: tokens/twitch.yml
 channel-names:

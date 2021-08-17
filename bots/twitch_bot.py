@@ -36,7 +36,11 @@ class TwitchBot(commands.Bot):
 
     async def _init_jack_api(self):
         """Set up for connecting to the Jack API."""
-        self.api_url = f'http://{self.cfg["api"]["host"]}:{self.cfg["api"]["port"]}/'
+        if 'url' in self.cfg['api']:
+            self.api_url = self.cfg['api']['url']
+        else:
+            self.api_url = f'http://{self.cfg["api"]["host"]}:{self.cfg["api"]["port"]}/'
+
         self.twitch_status_endpoint = urljoin(self.api_url, 'twitch/status/')
         self.twitch_message_endpoint = urljoin(self.api_url, 'twitch/message/')
         self.status = {'mode': self.bot_mode}
