@@ -57,9 +57,9 @@ def main():
             description='Something something moon',
             version='0.1',
             root_path=cfg['nginx-settings']['root_path'],
-            docs_url=cfg['nginx-settings']['docs_url'],
-            redoc_url=cfg['nginx-settings']['redoc_url'],
-            openapi_url=cfg['nginx-settings']['openapi_url']
+            # docs_url=cfg['nginx-settings']['docs_url'],
+            # redoc_url=cfg['nginx-settings']['redoc_url'],
+            # openapi_url=cfg['nginx-settings']['openapi_url']
         )
     else:
         app = FastAPI(
