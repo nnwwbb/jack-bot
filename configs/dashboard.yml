@@ -1,0 +1,7 @@
+mode: run-dashboard
+log-level: DEBUG
+api:
+  host: localhost
+  port: 6660
+tokens:
+  dashboard: tokens/dashboard.yml

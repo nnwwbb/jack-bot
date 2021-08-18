@@ -19,11 +19,6 @@ def read_root():
     return {'status': 'Ready to chat!'}
 
 
-@router.get('/items/{item_id}')
-def read_item(item_id: int, q: Optional[str] = None):
-    return {'item_id': item_id, 'q': q}
-
-
 @router.get('/twitch/status', response_model=TwitchBotStatus)
 def get_twitch_bot_status():
     return api_service.get_twitch_bot_status()

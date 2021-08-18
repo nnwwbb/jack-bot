@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import List, Optional
+import datetime
 
 
 class TwitchBotStatus(BaseModel):
@@ -14,6 +15,7 @@ class TwitchMessage(BaseModel):
     message_text: str
     is_command: Optional[bool]
     command_type: Optional[str]
+    datetime: Optional[datetime.datetime]
 
 
 class MessageListRequest(BaseModel):

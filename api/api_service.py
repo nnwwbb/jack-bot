@@ -11,7 +11,7 @@ class APIService:
         print(self.cfg)
         self.logger = logging.getLogger(__name__)
         self.user_df_cols = ['twitch_name', 'twitch_id', 'admin', 'rally_wallet_id', 'rally_auth_token']
-        self.message_show_cols = ['channel_name', 'author_name', 'message_text', 'is_command', 'command_type']
+        self.message_show_cols = ['channel_name', 'author_name', 'message_text', 'datetime', 'is_command', 'command_type']
         self.admin_acc = {'twitch_name': cfg}
         self._init_twitch_status()
         self._init_df()

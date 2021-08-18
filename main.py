@@ -2,6 +2,7 @@ import click
 import uvicorn
 import logging
 import os
+import subprocess
 from utils import load_config, logging_setup
 from bots.twitch_bot import TwitchBot
 
@@ -15,7 +16,6 @@ def main(config):
     cfg = load_config(config)
     logging_setup(cfg['log-level'])
     logger = logging.getLogger(__name__)
-    # logger.info(f'Starting with config {cfg}')
 
     if cfg['mode'] == 'run-api':
         # launch the API
@@ -31,6 +31,9 @@ def main(config):
     elif cfg['mode'] == 'run-twitch-bot':
         bot = TwitchBot(cfg=cfg)
         bot.run()
+    elif cfg['mode'] == 'run-dashboard':
+        # run the dash as a subprocess so the session state works
+        subprocess.run(["streamlit", "run", "dashboard/dashboard.py"])
     else:
         logger.error(f"Unrecognized mode: {cfg['mode']}")
 

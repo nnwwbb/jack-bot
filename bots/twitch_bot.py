@@ -5,8 +5,8 @@ import requests as r
 from twitchio.ext import commands
 from utils import load_config, logging_setup
 from connectors.twitch_connector import TwitchConnector
-from rich import print
 from urllib.parse import urljoin
+from datetime import datetime
 
 
 class TwitchBot(commands.Bot):
@@ -125,12 +125,15 @@ class TwitchBot(commands.Bot):
         await self.handle_commands(message)
 
     def message_to_dict(self, message, command_type=None):
+        # print(json.dumps(datetime.now()))
+        print(datetime.now().isoformat())
         msg = {
             'channel_name': message.author.channel.name,
             'author_name': message.author.name,
             'author_id': message.author.id,
             'message_text': message.content,
-            'is_command': False
+            'is_command': False,
+            'datetime': datetime.now().isoformat()
         }
         if command_type:
             msg['is_command'] = True
