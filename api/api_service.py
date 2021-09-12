@@ -4,6 +4,7 @@ import os
 import json
 from datetime import datetime, timedelta
 from api.api_model import TwitchBotStatus, TwitchMessage
+from connectors.rally_connector import RallyConnector
 from typing import List
 from pythonosc import udp_client
 
@@ -22,7 +23,10 @@ class APIService:
 
         self._init_twitch_status()
         self._init_df()
+        self._init_rally_connector()
+        self._init_osc()
         self._load_user_data()
+        self._load_nft_templates()
 
         self.logger.info('API service ready!')
 
@@ -54,13 +58,18 @@ class APIService:
                     'admin': True
                 }
                 self.df_user = self.df_user.append(admin_acc, ignore_index=True)
-        self.logger.info(self.df_user)
+        self.logger.info('Message dataframe initiated.')
+
+    def _init_rally_connector(self):
+        self.rally = RallyConnector(self.cfg)
+        self.logger.info('Rally connector ready.')
 
     def _init_osc(self):
         self.client = udp_client.SimpleUDPClient(
             self.twitch_status['osc_ip'],
             self.twitch_status['osc_port']
         )
+        self.logger.info('OSC client ready.')
 
     def _load_user_data(self):
         """Try to load user auth data."""
@@ -68,14 +77,21 @@ class APIService:
             self.logger.info(f'Found user data in {self.user_info_path}')
             with open(self.user_info_path, 'r') as f:
                 data = json.load(f)
-            self.user_infos = data['users']
+            self.user_infos = {d['username']: d for d in data['users']}
         else:
-            self.user_infos = []
+            self.user_infos = {}
 
     def _write_user_data(self):
-        infos_nodups = [dict(t) for t in {tuple(d.items()) for d in self.user_infos}]
+        """Persist user data to disk."""
+        infos_nodups = [val for _, val in self.user_infos.items()]
         with open(self.user_info_path, 'w') as f:
-            json.dump({'users': infos_nodups}, f)
+            json.dump({'users': infos_nodups}, f, indent=4)
+
+    def _load_nft_templates(self):
+        """Load NFT Template info for all known template IDs."""
+        self.nft_templates = self.get_nft_templates()
+        self.nft_templates_byid = {nft['id']: nft for nft in self.nft_templates}
+        self.logger.info(f'Loaded {len(self.nft_templates)} NFT templates.')
 
     def get_twitch_bot_status(self):
         """Return the settings made for the Twitch bot."""
@@ -116,5 +132,37 @@ class APIService:
         """Store a user's information for NFT check."""
         info = info.dict()
         self.logger.debug(f'Got user info {info}')
-        self.user_infos.append(info)
+        self.user_infos[info['username']] = info
         self._write_user_data()
+
+    def set_rally_tokens(self, info):
+        info = info.dict()
+        self.logger.info(f'Setting Rally tokens to {info}...')
+        self.rally.set_app_tokens(info)
+        self.logger.info('Tokens set!')
+
+    def get_nft_templates(self):
+        return self.rally.get_nft_templates()
+
+    def get_all_nfts(self):
+        self._load_nft_templates()
+        self.logger.info('Getting all NFTs...')
+        nfts = {}
+
+        for key, nft_template in self.nft_templates_byid.items():
+            res = self.rally.get_nft(key)
+            self.logger.debug(f'Found {res}')
+            nfts[key] = res
+
+        self.nfts = nfts
+        self.logger.info(f'Found {len(nfts)} unique NFTs.')
+        return nfts
+
+    def get_account_infos(self):
+        infos = []
+        self.logger.info('Retrieving user datas...')
+        for _, auth_info in self.user_infos.items():
+            res = self.rally.get_account_info(auth_info['username'])
+            self.logger.info(res)
+            infos.append(res)
+        return infos

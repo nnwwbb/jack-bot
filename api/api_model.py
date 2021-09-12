@@ -30,3 +30,8 @@ class UserAuth(BaseModel):
     rnbUserId: str
     code: str
     state: str
+
+
+class RallyInfo(BaseModel):
+    access_token: str
+    refresh_token: str

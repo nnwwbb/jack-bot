@@ -4,7 +4,7 @@ from typing import Optional, List
 from fastapi import FastAPI, APIRouter, Query
 from utils import load_config, logging_setup
 from api.api_service import APIService
-from api.api_model import TwitchBotStatus, TwitchMessage, UserAuth
+from api.api_model import TwitchBotStatus, TwitchMessage, UserAuth, RallyInfo
 
 
 cfg = load_config(os.environ.get('CONFIG_FILE', 'configs/default.yml'))
@@ -47,6 +47,26 @@ def get_messages(seconds_history: int = None, channel_names: Optional[List[str]]
 @router.post('/user/auth')
 def post_user_auth(info: UserAuth):
     api_service.add_user_info(info)
+
+
+@router.get('/user/all_infos')
+def get_user_infos():
+    return api_service.get_account_infos()
+
+
+@router.post('/rally/tokens')
+def post_rally_token(info: RallyInfo):
+    api_service.set_rally_tokens(info)
+
+
+@router.get('/rally/nft-templates')
+def get_nft_templates():
+    return api_service.get_nft_templates()
+
+
+@router.get('/rally/all-nfts')
+def get_all_nfts():
+    return api_service.get_all_nfts()
 
 
 def main():

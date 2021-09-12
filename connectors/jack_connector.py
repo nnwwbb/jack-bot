@@ -15,6 +15,8 @@ class JackConnector(BaseConnector):
             self.api_url = cfg['api']['url']
         self.twitch_status_url = self.api_url + '/twitch/status'
         self.twitch_messages_url = self.api_url + '/twitch/get_messages'
+        self.twitch_all_nfts_url = self.api_url + '/rally/all-nfts'
+        self.twitch_all_users_url = self.api_url + '/user/all_infos'
         self.logger = logging.getLogger(__name__)
 
         self._connect()
@@ -47,3 +49,13 @@ class JackConnector(BaseConnector):
             for channel_name in channel_names:
                 url += '&channel_names=' + channel_name
         return r.get(url).json()
+
+    def get_all_nfts(self):
+        return r.get(
+            self.twitch_all_nfts_url
+        ).json()
+
+    def get_all_users(self):
+        return r.get(
+            self.twitch_all_users_url
+        ).json()

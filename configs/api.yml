@@ -12,3 +12,8 @@ api:
     osc-port: 5005
 tokens:
   twitch: tokens/twitch.yml
+rally:
+  api-url: https://api.rally.io
+  coin: VCA
+  nft-template-ids:
+    - c6ec1410-008a-11ec-9abe-c530a6060db3

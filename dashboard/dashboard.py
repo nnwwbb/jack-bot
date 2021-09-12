@@ -72,16 +72,30 @@ def show_settings():
         st.write(f'Result: {result}')
 
 
+def show_nft_info():
+    nfts = st.session_state.api.get_all_nfts()
+    st.write(nfts)
+
+
+def show_user_info():
+    users = st.session_state.api.get_all_users()
+    st.write(users)
+
+
 def show_main_dash():
     st.sidebar.write('logged in!')
     page = st.sidebar.selectbox(
-        'Dash page', ['settings', 'show twitch chat']
+        'Dash page', ['settings', 'show twitch chat', 'NFT info', 'User info']
     )
 
     if page == 'show twitch chat':
         show_twitch_chat()
     elif page == 'settings':
         show_settings()
+    elif page == 'NFT info':
+        show_nft_info()
+    elif page == 'User info':
+        show_user_info()
 
 
 def check_credentials():
