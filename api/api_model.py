@@ -23,3 +23,10 @@ class TwitchMessage(BaseModel):
 class MessageListRequest(BaseModel):
     seconds_history: Optional[int]
     channel_names: Optional[List[str]]
+
+
+class UserAuth(BaseModel):
+    username: str
+    rnbUserId: str
+    code: str
+    state: str

@@ -4,7 +4,7 @@ from typing import Optional, List
 from fastapi import FastAPI, APIRouter, Query
 from utils import load_config, logging_setup
 from api.api_service import APIService
-from api.api_model import TwitchBotStatus, TwitchMessage
+from api.api_model import TwitchBotStatus, TwitchMessage, UserAuth
 
 
 cfg = load_config(os.environ.get('CONFIG_FILE', 'configs/default.yml'))
@@ -42,6 +42,11 @@ def get_messages(seconds_history: int = None, channel_names: Optional[List[str]]
         channel_names=channel_names
     )
     return res
+
+
+@router.post('/user/auth')
+def post_user_auth(info: UserAuth):
+    api_service.add_user_info(info)
 
 
 def main():

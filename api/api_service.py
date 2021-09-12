@@ -1,5 +1,7 @@
 import pandas as pd
 import logging
+import os
+import json
 from datetime import datetime, timedelta
 from api.api_model import TwitchBotStatus, TwitchMessage
 from typing import List
@@ -16,9 +18,11 @@ class APIService:
         self.user_df_cols = ['twitch_name', 'twitch_id', 'admin', 'rally_wallet_id', 'rally_auth_token']
         self.message_show_cols = ['channel_name', 'author_name', 'message_text', 'datetime', 'is_command', 'command_type']
         self.admin_acc = {'twitch_name': cfg}
+        self.user_info_path = './data/users.json'
 
         self._init_twitch_status()
         self._init_df()
+        self._load_user_data()
 
         self.logger.info('API service ready!')
 
@@ -58,6 +62,21 @@ class APIService:
             self.twitch_status['osc_port']
         )
 
+    def _load_user_data(self):
+        """Try to load user auth data."""
+        if os.path.isfile(self.user_info_path):
+            self.logger.info(f'Found user data in {self.user_info_path}')
+            with open(self.user_info_path, 'r') as f:
+                data = json.load(f)
+            self.user_infos = data['users']
+        else:
+            self.user_infos = []
+
+    def _write_user_data(self):
+        infos_nodups = [dict(t) for t in {tuple(d.items()) for d in self.user_infos}]
+        with open(self.user_info_path, 'w') as f:
+            json.dump({'users': infos_nodups}, f)
+
     def get_twitch_bot_status(self):
         """Return the settings made for the Twitch bot."""
         self.logger.info('Returning Twitch Bot Status:')
@@ -92,3 +111,10 @@ class APIService:
             sub_df = sub_df[sub_df['channel_name'].isin(channel_names)]
         sub_df = sub_df[self.message_show_cols]
         return sub_df.to_dict('records')
+
+    def add_user_info(self, info):
+        """Store a user's information for NFT check."""
+        info = info.dict()
+        self.logger.debug(f'Got user info {info}')
+        self.user_infos.append(info)
+        self._write_user_data()
