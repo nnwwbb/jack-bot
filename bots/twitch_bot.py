@@ -176,6 +176,7 @@ def external_run_bot(cfg):
             logger.warning('Restarting Twitch bot...')
             init_time = datetime.now()
             proc.terminate()  # sends a SIGTERM
+            bot = TwitchBot(cfg=cfg)
             proc = multiprocessing.Process(target=bot.run, args=())
             proc.start()
             logger.warning(':tada:Twitch bot restarted!:tada:')
