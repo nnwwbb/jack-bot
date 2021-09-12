@@ -6,6 +6,8 @@ import datetime
 class TwitchBotStatus(BaseModel):
     channel_names: List[str]
     mode: str
+    osc_ip: str
+    osc_port: str
 
 
 class TwitchMessage(BaseModel):

@@ -4,5 +4,11 @@ api:
   host: localhost
   port: 6660
   reload: true
+  status:
+    channel-names:
+      - colinbenders
+    mode: testing
+    osc-ip: 127.0.0.1
+    osc-port: 5005
 tokens:
   twitch: tokens/twitch.yml

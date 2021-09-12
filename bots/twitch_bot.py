@@ -2,16 +2,18 @@ import asyncio
 import os
 import logging
 import requests as r
+import multiprocessing
+import time
 from twitchio.ext import commands
 from utils import load_config, logging_setup
 from connectors.twitch_connector import TwitchConnector
 from urllib.parse import urljoin
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class TwitchBot(commands.Bot):
 
-    def __init__(self, cfg=None, sec_between_check=3):
+    def __init__(self, cfg=None, sec_between_check=3, sec_token_exp=5):
         # Initialise our Bot with our access token, prefix and a list of channels to join on boot...
         # prefix can be a callable, which returns a list of strings or a string...
         # initial_channels can also be a callable which returns a list of strings...
@@ -23,10 +25,14 @@ class TwitchBot(commands.Bot):
         self.sec_between_check = sec_between_check
         self.command_prefix = '?'
         self.logger = logging.getLogger(__name__)
+        self.token_exp_duration = timedelta(seconds=sec_token_exp)
 
         self.twitch_connector = TwitchConnector(self.cfg)
 
-        # TODO: handle token expiration
+        self._run_bot()
+
+    def _run_bot(self):
+        """Used in init and on token expiration."""
         super().__init__(
             token=self.twitch_connector.get_oauth_token(),
             prefix=self.command_prefix,
@@ -64,13 +70,11 @@ class TwitchBot(commands.Bot):
                     self.status = twitch_status
                     self.logger.warning('Changed status!')
                     self.logger.warning(twitch_status)
-                    self.logger.warning(twitch_status['channel_names'])
                     await self.join_channels(channels=twitch_status['channel_names'])
                 await asyncio.sleep(self.sec_between_check)
             except Exception as ex:
                 self.logger.error(ex)
                 await asyncio.sleep(self.sec_between_check)
-            # time.sleep(self.sec_between_check)
 
     @commands.command()
     async def hello(self, ctx: commands.Context):
@@ -125,8 +129,6 @@ class TwitchBot(commands.Bot):
         await self.handle_commands(message)
 
     def message_to_dict(self, message, command_type=None):
-        # print(json.dumps(datetime.now()))
-        print(datetime.now().isoformat())
         msg = {
             'channel_name': message.author.channel.name,
             'author_name': message.author.name,
@@ -160,7 +162,30 @@ class TwitchBot(commands.Bot):
             self.logger.error(ex)
 
 
+def external_run_bot(cfg):
+    logger = logging.getLogger(__name__)
+    init_time = datetime.now()
+    token_exp_duration = timedelta(seconds=cfg['refresh']['expiration-seconds'])
+
+    bot = TwitchBot(cfg=cfg)
+    proc = multiprocessing.Process(target=bot.run, args=())
+    proc.start()
+
+    while True:
+        if datetime.now() - init_time > token_exp_duration:
+            logger.warning('Restarting Twitch bot...')
+            init_time = datetime.now()
+            proc.terminate()  # sends a SIGTERM
+            proc = multiprocessing.Process(target=bot.run, args=())
+            proc.start()
+            logger.warning(':tada:Twitch bot restarted!:tada:')
+        else:
+            logger.info('Token refresh check passed.')
+            time.sleep(cfg['refresh']['expiration-check'])
+
+
 def main():
+    # DEPRECATED
     logging_setup(log_level='INFO')
     bot = TwitchBot()
     bot.run()

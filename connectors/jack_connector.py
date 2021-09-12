@@ -27,6 +27,14 @@ class JackConnector(BaseConnector):
     def get_twitch_bot_status(self):
         return r.get(self.twitch_status_url).json()
 
+    def set_twitch_bot_status(self, new_status):
+        print(type(new_status))
+        res = r.patch(self.twitch_status_url, json=new_status)
+        if res.status_code == 200:
+            return 'Success!'
+        else:
+            return res.json()
+
     def get_twitch_messages(self, seconds_history=None, channel_names=None):
         url = self.twitch_messages_url
         if any([seconds_history, channel_names]):

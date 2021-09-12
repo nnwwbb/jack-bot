@@ -4,7 +4,7 @@ import logging
 import os
 import subprocess
 from utils import load_config, logging_setup
-from bots.twitch_bot import TwitchBot
+from bots.twitch_bot import external_run_bot
 
 
 @click.command()
@@ -29,8 +29,8 @@ def main(config):
             log_config=None
         )
     elif cfg['mode'] == 'run-twitch-bot':
-        bot = TwitchBot(cfg=cfg)
-        bot.run()
+        # run the bot using multiprocess for token expiration checking
+        external_run_bot(cfg)
     elif cfg['mode'] == 'run-dashboard':
         # run the dash as a subprocess so the session state works
         subprocess.run(["streamlit", "run", "dashboard/dashboard.py"])

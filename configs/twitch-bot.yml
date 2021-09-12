@@ -8,3 +8,6 @@ tokens:
   twitch: tokens/twitch.yml
 channel-names:
   - colinbenders
+refresh:
+  expiration-seconds: 3600
+  expiration-check: 60

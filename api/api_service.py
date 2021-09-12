@@ -3,24 +3,31 @@ import logging
 from datetime import datetime, timedelta
 from api.api_model import TwitchBotStatus, TwitchMessage
 from typing import List
+from pythonosc import udp_client
 
 
 class APIService:
     def __init__(self, cfg=None):
         self.cfg = cfg
-        print(self.cfg)
         self.logger = logging.getLogger(__name__)
+        self.logger.info('API Service starting with config')
+        self.logger.info(self.cfg)
+
         self.user_df_cols = ['twitch_name', 'twitch_id', 'admin', 'rally_wallet_id', 'rally_auth_token']
         self.message_show_cols = ['channel_name', 'author_name', 'message_text', 'datetime', 'is_command', 'command_type']
         self.admin_acc = {'twitch_name': cfg}
+
         self._init_twitch_status()
         self._init_df()
+
         self.logger.info('API service ready!')
 
     def _init_twitch_status(self):
         self.twitch_status = {
-            'channel_names': ['colinbenders'],
-            'mode': 'testing'
+            'channel_names': self.cfg['api']['status']['channel-names'],
+            'mode': self.cfg['api']['status']['mode'],
+            'osc_ip': self.cfg['api']['status']['osc-ip'],
+            'osc_port': self.cfg['api']['status']['osc-port']
         }
         self.logger.info('Initial Twitch Bot Status:')
         self.logger.info(self.twitch_status)
@@ -28,12 +35,14 @@ class APIService:
     def _init_df(self):
         """Initialize our dataframe."""
         col_names = [i for i, v in TwitchMessage.__fields__.items()] + ['timestamp']
-        print(col_names)
+
         self.df_message = pd.DataFrame(columns=col_names)
         self.df_user = pd.DataFrame(columns=self.user_df_cols)
+
         self.logger.info('Dataframes initialized:')
         self.logger.info(self.df_message)
         self.logger.info(self.df_user)
+
         if 'twitch' in self.cfg:
             for username in self.cfg['twitch']['twitch_admins']:
                 admin_acc = {
@@ -42,6 +51,12 @@ class APIService:
                 }
                 self.df_user = self.df_user.append(admin_acc, ignore_index=True)
         self.logger.info(self.df_user)
+
+    def _init_osc(self):
+        self.client = udp_client.SimpleUDPClient(
+            self.twitch_status['osc_ip'],
+            self.twitch_status['osc_port']
+        )
 
     def get_twitch_bot_status(self):
         """Return the settings made for the Twitch bot."""
