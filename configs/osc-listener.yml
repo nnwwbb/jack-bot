@@ -1,0 +1,5 @@
+mode: run-osc-listener
+log-level: DEBUG
+listener:
+  osc-ip: 127.0.0.1
+  osc-port: 5005

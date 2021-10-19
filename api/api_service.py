@@ -65,7 +65,7 @@ class APIService:
         self.logger.info('Rally connector ready.')
 
     def _init_osc(self):
-        self.client = udp_client.SimpleUDPClient(
+        self.osc_client = udp_client.SimpleUDPClient(
             self.twitch_status['osc_ip'],
             self.twitch_status['osc_port']
         )
@@ -166,3 +166,23 @@ class APIService:
             self.logger.info(res)
             infos.append(res)
         return infos
+
+    def form_osc_message(self, data, message_type='twitch-chat'):
+        if message_type == 'twitch-chat':
+            osc_address = '/twitch-chat'
+            osc_message = [f'{key}:::{val}' for key, val in data.items()]
+
+        return osc_address, osc_message
+
+    async def handle_twitch_message(self, message):
+        """Store the message and send it through OSC."""
+        self.store_message(message)
+        await self.send_twitch_message_osc(message)
+
+    async def send_twitch_message_osc(self, message):
+        self.logger.info(f'Sending Twitch chat OSC: {message}')
+        osc_address, osc_message = self.form_osc_message(
+            message.dict(),
+            message_type='twitch-chat'
+        )
+        self.osc_client.send_message(osc_address, osc_message)

@@ -26,13 +26,14 @@ def get_twitch_bot_status():
 
 @router.patch('/twitch/status')
 def set_twitch_bot_status(status: TwitchBotStatus):
+    """Set config status for the API and twitch bot."""
     api_service.set_twitch_bot_status(status)
 
 
 @router.post('/twitch/message')
-def new_twitch_message(message: TwitchMessage):
+async def new_twitch_message(message: TwitchMessage):
     """Accepts new Twitch messages from the bot."""
-    api_service.store_message(message)
+    await api_service.handle_twitch_message(message)
 
 
 @router.get('/twitch/get_messages')

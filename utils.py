@@ -2,6 +2,8 @@ import logging
 import yaml
 from rich.logging import RichHandler
 from rich.console import Console
+from pythonosc.dispatcher import Dispatcher
+from pythonosc.osc_server import BlockingOSCUDPServer
 
 
 def logging_setup(log_level="DEBUG"):
@@ -23,3 +25,24 @@ def load_config(cfg_path):
                 data[cred_name] = yaml.safe_load(file)
 
     return data
+
+
+def print_handler(address, *args):
+    print(f"{address}: {args}")
+
+
+def default_handler(address, *args):
+    print(f"DEFAULT {address}: {args}")
+
+
+def run_osc_listener(cfg):
+    """Run a simple OSC server that listens to incoming messages for debugging."""
+    dispatcher = Dispatcher()
+    dispatcher.map("/something/*", print_handler)
+    dispatcher.set_default_handler(default_handler)
+
+    server = BlockingOSCUDPServer(
+        (cfg['listener']['osc-ip'], cfg['listener']['osc-port']),
+        dispatcher
+    )
+    server.serve_forever()  # Blocks forever
