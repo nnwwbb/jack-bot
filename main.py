@@ -9,7 +9,7 @@ from bots.twitch_bot import external_run_bot
 
 @click.command()
 @click.option('-c', '--config',
-              default='config/api.yml',
+              default='configs/api.yml',
               help='Config file to be used. Mode specific.')
 def main(config):
     os.environ['CONFIG_FILE'] = config
