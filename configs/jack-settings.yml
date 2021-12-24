@@ -1,0 +1,7 @@
+mode: run-settings
+log-level: DEBUG
+api:
+  host: localhost
+  port: 6660
+dash:
+  base_url_path: /jack-settings

@@ -1,0 +1,5 @@
+mode: run-osc-listener
+log-level: DEBUG
+listener:
+  osc-ip: 0.0.0.0
+  osc-port: 7001

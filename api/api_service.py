@@ -26,7 +26,7 @@ class APIService:
         self._init_rally_connector()
         self._init_osc()
         self._load_user_data()
-        self._load_nft_templates()
+        self.get_all_nfts()
 
         self.logger.info('API service ready!')
 
@@ -65,9 +65,12 @@ class APIService:
         self.logger.info('Rally connector ready.')
 
     def _init_osc(self):
+        self.logger.info('Initializing OSC client...')
+        self.logger.info(f'OSC target IP: {self.twitch_status["osc_ip"]}')
+        self.logger.info(f'OSC target port: {int(self.twitch_status["osc_port"])}')
         self.osc_client = udp_client.SimpleUDPClient(
             self.twitch_status['osc_ip'],
-            self.twitch_status['osc_port']
+            int(self.twitch_status['osc_port'])
         )
         self.logger.info('OSC client ready.')
 
@@ -104,6 +107,7 @@ class APIService:
         self.logger.info('Setting Twitch Bot status:')
         self.logger.info(status.dict())
         self.twitch_status = status.dict()
+        self._init_osc()
 
     def store_message(self, message: TwitchMessage):
         """Store the message in the dataframe."""
@@ -131,9 +135,27 @@ class APIService:
     def add_user_info(self, info):
         """Store a user's information for NFT check."""
         info = info.dict()
-        self.logger.debug(f'Got user info {info}')
+        self.logger.debug(f'Got user info {info}. Looking up NFTs...')
+        rally_account_info = self.get_rally_account_info(info['username'])
+        if 'rallyNetworkWalletIds' in rally_account_info:
+            info['rally'] = rally_account_info
+            info = self.get_wallet_nfts(info)
         self.user_infos[info['username']] = info
         self._write_user_data()
+
+    def get_wallet_nfts(self, user_info):
+        """Get all the NFTs in a wallet."""
+        self.logger.info(f'Checking NFTs for {user_info}...')
+        self.get_all_nfts(return_value=False)
+        user_info['nfts'] = []
+
+        for nft_template_id, nfts in self.nfts.items():
+            for nft in nfts:
+                if nft['rallyNetworkWalletId'] in user_info['rally']['rallyNetworkWalletIds']:
+                    self.logger.info(f'Found NFT: {nft}')
+                    user_info['nfts'].append(nft)
+
+        return user_info
 
     def set_rally_tokens(self, info):
         info = info.dict()
@@ -144,7 +166,7 @@ class APIService:
     def get_nft_templates(self):
         return self.rally.get_nft_templates()
 
-    def get_all_nfts(self):
+    def get_all_nfts(self, return_value=True):
         self._load_nft_templates()
         self.logger.info('Getting all NFTs...')
         nfts = {}
@@ -156,16 +178,17 @@ class APIService:
 
         self.nfts = nfts
         self.logger.info(f'Found {len(nfts)} unique NFTs.')
-        return nfts
+        if return_value:
+            return nfts
 
-    def get_account_infos(self):
-        infos = []
-        self.logger.info('Retrieving user datas...')
-        for _, auth_info in self.user_infos.items():
-            res = self.rally.get_account_info(auth_info['username'])
-            self.logger.info(res)
-            infos.append(res)
-        return infos
+    def get_rally_account_info(self, id_):
+        self.logger.info(f'Retrieving user data for {id_}...')
+        res = self.rally.get_account_info(id_)
+        self.logger.info(res)
+        return res
+
+    def get_all_account_infos(self):
+        return list(self.user_infos.values())
 
     def form_osc_message(self, data, message_type='twitch-chat'):
         if message_type == 'twitch-chat':

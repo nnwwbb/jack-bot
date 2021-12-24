@@ -50,9 +50,14 @@ def post_user_auth(info: UserAuth):
     api_service.add_user_info(info)
 
 
+@router.get('/user/info')
+def get_user_info(id: str):
+    return api_service.get_rally_account_info(id)
+
+
 @router.get('/user/all_infos')
 def get_user_infos():
-    return api_service.get_account_infos()
+    return api_service.get_all_account_infos()
 
 
 @router.post('/rally/tokens')

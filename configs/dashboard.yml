@@ -8,3 +8,4 @@ tokens:
 dash:
   seconds_history: 300
   seconds_refresh: 2
+  base_url_path: /dashboard

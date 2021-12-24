@@ -9,7 +9,7 @@ from bots.twitch_bot import external_run_bot
 
 @click.command()
 @click.option('-c', '--config',
-              default='config/api-playground.yml',
+              default='config/api.yml',
               help='Config file to be used. Mode specific.')
 def main(config):
     os.environ['CONFIG_FILE'] = config
@@ -33,7 +33,16 @@ def main(config):
         external_run_bot(cfg)
     elif cfg['mode'] == 'run-dashboard':
         # run the dash as a subprocess so the session state works
-        subprocess.run(["streamlit", "run", "dashboard/dashboard.py"])
+        args = ["streamlit", "run", "dashboard/dashboard.py"]
+        if 'base_url_path' in cfg['dash']:
+            args += ['--server.baseUrlPath', cfg['dash']['base_url_path']]
+        subprocess.run(args)
+    elif cfg['mode'] == 'run-settings':
+        # run the dash as a subprocess so the session state works
+        args = ["streamlit", "run", "dashboard/jack_settings.py"]
+        if 'base_url_path' in cfg['dash']:
+            args += ['--server.baseUrlPath', cfg['dash']['base_url_path']]
+        subprocess.run(args)
     elif cfg['mode'] == 'run-osc-listener':
         run_osc_listener(cfg)
     else:
