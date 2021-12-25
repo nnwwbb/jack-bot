@@ -3,7 +3,7 @@ import uvicorn
 import logging
 import os
 import subprocess
-from utils import load_config, logging_setup, run_osc_listener
+from utils import load_config, run_osc_listener
 from bots.twitch_bot import external_run_bot
 
 
@@ -14,7 +14,6 @@ from bots.twitch_bot import external_run_bot
 def main(config):
     os.environ['CONFIG_FILE'] = config
     cfg = load_config(config)
-    logging_setup(cfg['log-level'])
     logger = logging.getLogger(__name__)
 
     if cfg['mode'] == 'run-api':
@@ -28,23 +27,32 @@ def main(config):
             factory=True,
             log_config=None
         )
+
     elif cfg['mode'] == 'run-twitch-bot':
         # run the bot using multiprocess for token expiration checking
         external_run_bot(cfg)
+
     elif cfg['mode'] == 'run-dashboard':
         # run the dash as a subprocess so the session state works
         args = ["streamlit", "run", "dashboard/dashboard.py"]
+        if 'port' in cfg['dash']:
+            args += ["--server.port", str(cfg['dash']['port'])]
         if 'base_url_path' in cfg['dash']:
             args += ['--server.baseUrlPath', cfg['dash']['base_url_path']]
         subprocess.run(args)
+
     elif cfg['mode'] == 'run-settings':
         # run the dash as a subprocess so the session state works
         args = ["streamlit", "run", "dashboard/jack_settings.py"]
+        if 'port' in cfg['dash']:
+            args += ["--server.port", str(cfg['dash']['port'])]
         if 'base_url_path' in cfg['dash']:
             args += ['--server.baseUrlPath', cfg['dash']['base_url_path']]
         subprocess.run(args)
+
     elif cfg['mode'] == 'run-osc-listener':
         run_osc_listener(cfg)
+
     else:
         logger.error(f"Unrecognized mode: {cfg['mode']}")
 

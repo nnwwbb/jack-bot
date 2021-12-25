@@ -1,18 +1,27 @@
 import logging
 import yaml
+import os
+from datetime import datetime
 from rich.logging import RichHandler
 from rich.console import Console
 from pythonosc.dispatcher import Dispatcher
 from pythonosc.osc_server import BlockingOSCUDPServer
 
 
-def logging_setup(log_level="DEBUG"):
+def logging_setup(service_name, log_level="DEBUG", log_path='logs'):
     console = Console(force_terminal=True)
+    date_str = str(datetime.utcnow().date())
+    fname = os.path.join(
+        log_path,
+        f'{service_name}-{date_str}.log'
+    )
+    file_handler = logging.FileHandler(fname, mode='a')
+    rich_handler = RichHandler(rich_tracebacks=True, markup=True, console=console)
     logging.basicConfig(
         level=log_level,
         format="%(funcName)15s() - %(message)s",
         datefmt="[%X]",
-        handlers=[RichHandler(rich_tracebacks=True, markup=True, console=console)]
+        handlers=[rich_handler, file_handler]
     )
 
 

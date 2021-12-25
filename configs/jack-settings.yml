@@ -4,4 +4,5 @@ api:
   host: localhost
   port: 6660
 dash:
+  port: 8502
   base_url_path: /jack-settings

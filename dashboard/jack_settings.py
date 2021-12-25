@@ -10,22 +10,23 @@ logger = logging.getLogger(__name__)
 
 
 def show_main_settings():
-    st.write(f'Hi {st.session_state.query_params}')
+    st.write(f'Token: {st.session_state.query_params}')
+    st.write('Getting user info, please wait...')
 
 
 def run_dash():
     cfg = load_config(os.environ['CONFIG_FILE'])
-    logging_setup(log_level=cfg['log-level'])
+    logging_setup(service_name='jack-settings', log_level=cfg['log-level'])
     logger.info(query_params := st.experimental_get_query_params())
     st.session_state.cfg = cfg
     st.session_state.api = JackConnector(cfg)
     st.session_state.query_params = query_params
 
-    if 'id' in query_params:
-        # TODO: check if id is known
+    if 'token' in query_params:
         show_main_settings()
     else:
-        st.write('Malformed URL.')
+        st.write('Malformed URL, missing token.')
+        st.write(query_params)
 
 
 if __name__ == '__main__':

@@ -8,7 +8,7 @@ from api.api_model import TwitchBotStatus, TwitchMessage, UserAuth, RallyInfo
 
 
 cfg = load_config(os.environ.get('CONFIG_FILE', 'configs/default.yml'))
-logging_setup(log_level=cfg['log-level'])
+logging_setup(log_level=cfg['log-level'], service_name='api')
 logger = logging.getLogger(__name__)
 api_service = APIService(cfg=cfg)
 router = APIRouter()

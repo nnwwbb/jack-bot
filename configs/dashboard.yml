@@ -6,6 +6,7 @@ api:
 tokens:
   dashboard: tokens/dashboard.yml
 dash:
+  port: 8501
   seconds_history: 300
   seconds_refresh: 2
   base_url_path: /dashboard

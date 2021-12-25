@@ -119,7 +119,7 @@ def run_dash():
     sys.setrecursionlimit(1500)
 
     cfg = load_config(os.environ['CONFIG_FILE'])
-    logging_setup(log_level=cfg['log-level'])
+    logging_setup(service_name='dashboard', log_level=cfg['log-level'])
     st.session_state.cfg = cfg
     st.session_state.api = JackConnector(cfg)
 

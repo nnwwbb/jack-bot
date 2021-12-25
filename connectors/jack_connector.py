@@ -1,10 +1,12 @@
 import logging
 import requests as r
+import backoff
 from connectors.base_connector import BaseConnector
 
 
 class JackConnector(BaseConnector):
     """Connect to the Jack Bot API for chat and user info."""
+
     def __init__(self, cfg):
         super().__init__(cfg)
         assert 'api' in cfg, 'Please supply a url or host/port combination for the Jack API.'
@@ -21,6 +23,9 @@ class JackConnector(BaseConnector):
 
         self._connect()
 
+    @backoff.on_exception(backoff.expo,
+                          r.exceptions.ConnectionError,
+                          max_time=10)
     def _connect(self):
         res = r.get(self.api_url)
         self.logger.info(res.status_code)
